@@ -2,6 +2,11 @@
 
 Este projeto tem como objetivo implementar um analisador léxico (lexer) em Python 3, capaz de ler um arquivo de código-fonte e produzir uma sequência de tokens válidos.  
 
+---
+## Algumas definições de codigo a serem seguidas:
+- Classes devem ser nomeadas em CamelCase e em inglês.
+- Funções e variáveis devem ser nomeadas em snake_case.
+- Constantes devem ser nomeadas em UPPER_CASE.
 
 
 ---
@@ -68,17 +73,17 @@ LFA_TPI_2025_1/
 
 ---
 ## Cronograma de Desenvolvimento (até 20/06)
-| Check   | Sprint       | Período       | Objetivos principais                                                                                                                          |
-|---------|--------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| - [ X ] | **Sprint 1** | 07/05 – 16/05 | - Levantamento de requisitos e tipos de token<br>- Desenho do AFD (diagrama)<br>- Setup mínimo do repositório e pastas principais             |
-| - [ ]   | **Sprint 2** | 16/05 – 30/05 | - Implementação da leitura de arquivo e ponteiro de caracteres<br>- Codificação das transições do AFD <br>- Buffer de lexema e mudança de estados |
-| - [ ]   | **Sprint 3** | 30/05 – 16/06 | - Emissão de tokens com tipo, valor e posição<br>- Tratamento de espaços e comentários<br>- Desenvolvimento de testes unitários em            |
-| - [ ]   | **Sprint 4** | 16/06 – 20/06 | - Documentação final e ajustes no README<br>- Revisão de código e limpeza<br>- Preparação de material de entrega                              |
+| Check   | Sprint       | Período       | Objetivos principais                                                                                                              |
+|---------|--------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| - [ X ] | **Sprint 1** | 07/05 – 16/05 | - Levantamento de requisitos e tipos de token<br>- Desenho do AFD (diagrama)<br>- Setup mínimo do repositório e pastas principais |
+| - [ ]   | **Sprint 2** | 16/05 – 30/05 | - Implementação da leitura de arquivo e ponteiro de caracteres<br>- Codificação das transições do AFD                             |
+| - [ ]   | **Sprint 3** | 30/05 – 16/06 | - Emissão de tokens com tipo, valor e posição<br> - Tratamento de espaços e comentários<br>                                       |
+| - [ ]   | **Sprint 4** | 16/06 – 20/06 | - Documentação final e ajustes no README<br>- Revisão de código e limpeza<br>- Preparação de material de entrega                  |
 
 
 ---
 ## Ferramentas e Referências Utilizadas
-- Python 3.10
+- Python 3.10 e documentação
 - PyCharm
 - Git
 - JFLAP (Criação do AFD)

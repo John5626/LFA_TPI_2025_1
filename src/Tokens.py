@@ -12,6 +12,16 @@ for name, code_val in token_name.items():
     ##print(f"TokenType.{name} = {code_val}")
     token_defs[name] = code_val
 
+def get_nome_simbolico(code):
+        """
+        Dado um código de token (int), retorna o nome simbólico (str),
+        ou None se não encontrar.
+        """
+        for name, c in token_name.items():
+            if c == code:
+                return name
+        return None
+
 class Token:
     def __init__(self, type_code, lexeme, line, column):
         self.type = type_code
@@ -38,3 +48,5 @@ class Token:
         )
 
         return string
+
+
