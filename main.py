@@ -83,7 +83,7 @@ def classificarLexema(afd: AFD, lexema: str) -> TipoToken:
     afd.reset()
 
     if lexema.startswith("//"):
-            print(f"[Comentário] {lexema}")
+            #print(f"[Comentário] {lexema}")
             return TipoToken.COMMENT
 
     if lexema in opCompDoisCarac:
