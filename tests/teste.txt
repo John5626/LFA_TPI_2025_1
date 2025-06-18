@@ -1,0 +1,17 @@
+int VARa = VARb - 4 ;
+int VARx = 123 ;
+float VARy = 0.5 ;
+char VARz = 65 ;
+bool VARflag = 1 ;
+
+if ( VARx == VARy ) { return VARx ; }
+
+VARa >= VARb <= VARc < VARd > VARe != VARf
+
+VARa + VARb - VARc * VARd / VARe % VARf && VARg || VARh
+
+[ VARa , VARb ]
+
+{ VARa ; VARb ; }
+
+//teste

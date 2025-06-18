@@ -1,0 +1,17 @@
+INTDEF VAR Atribuicao VAR SUB NUM_INT PVirgula
+INTDEF VAR Atribuicao NUM_INT PVirgula
+FLOATDEF VAR Atribuicao NUM_FLOAT PVirgula
+CHAR_TYPE VAR Atribuicao NUM_INT PVirgula
+BOLL_TYPE VAR Atribuicao NUM_INT PVirgula
+
+IF LParenteses VAR EQ VAR RParenteses LChave RETURN VAR PVirgula RChave
+
+VAR GEQ VAR LEQ VAR LT VAR GT VAR DIF VAR
+
+VAR SUM VAR SUB VAR MULT VAR DIV VAR RESTO VAR AND VAR OR VAR
+
+LColchete VAR Virgula VAR RColchete
+
+LChave VAR PVirgula VAR PVirgula RChave
+
+COMMENT

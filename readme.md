@@ -1,12 +1,9 @@
-# Analisador Léxico em Python
+# Implementação de um analisador léxico simplificado
 
-Este projeto tem como objetivo implementar um analisador léxico (lexer) em Python 3, capaz de ler um arquivo de código-fonte e produzir uma sequência de tokens válidos.  
-
----
-## Algumas definições de codigo a serem seguidas:
-- Classes devem ser nomeadas em CamelCase e em inglês.
-- Funções e variáveis devem ser nomeadas em snake_case.
-- Constantes devem ser nomeadas em UPPER_CASE.
+O objetivo do presente trabalho, é desenvolver parte de um **Analisador Léxico Simplificado**, a parte a ser desenvolvida 
+é o **reconhecedor de tokens**. Além disso, a entrada do programa deverá ser um arquivo de texto e sua sintaxe limitada 
+aos caracteres apresentados a seguir. Cabe ressaltar que, além dos tokens solicitados, também foi incluído o símbolo 
+‘//’ para permitir comentários de linha no código de entrada, caso necessário.
 
 
 ---
@@ -16,18 +13,60 @@ Este projeto tem como objetivo implementar um analisador léxico (lexer) em Pyth
 - **Marcela Gomes Pinheiro** - [marcelagomes1]
 
 ---
+
+# Tokens reconhecidos
+
+```
+LParenteses (
+RParenteses )
+LChave {
+RChave }
+LColchete [
+RColchete ]
+EQ ==
+Atribuicao =
+GEQ >=
+LEQ <=
+GT >
+LT <
+NEG !
+Virgula ,
+PVirgula ;
+IF if
+SUM +
+SUB -
+MULT *
+DIV /
+RESTO %
+INTDEF int
+FLOATDEF float
+AND &&
+OR ||
+NUM_INT [0-9]+
+NUM_FLOAT [0-9]*\.[0-9]+
+DIF !=
+CHAR_TYPE char
+BOLL_TYPE bool
+RETURN return
+VAR VAR\.[A-Za-z0-9]*
+COMMENT //.*
+WHITESPACE \s+
+```
+---
 ## Descrição
 
-O analisador irá reconhecer categorias de tokens como:
+No geral, o analisador irá reconhecer categorias de tokens como:
 - Identificadores
 - Números (inteiros e reais)
 - Operadores e delimitadores
 - Palavras-reservadas
 - Comentários e espaços em branco (descartados)
 
+Mais detalhes acesse a documentação do projeto em `docs/DocumentaçãoLFA.pdf`.
+
 ---
 ## AFD
-![AFD](docs/Diagrama_Joao_v1.jpg)
+![AFD](docs/AFD.jpg)
 O AFD foi criado utilizando o JFLAP para facilitar a visualização e o entendimento do funcionamento do analisador léxico. O arquivo JFLAP pode ser encontrado na pasta `docs/`.
 
 ---
@@ -35,19 +74,19 @@ O AFD foi criado utilizando o JFLAP para facilitar a visualização e o entendim
 - Python 3.10 ou superior
 - pip (gerenciador de pacotes do Python)
 - JFLAP (opcional, para visualizar o AFD)
-
 ---
 
 ## Estrutura do Projeto
 ```bash
 LFA_TPI_2025_1/
-├── README.md
+├── readme.md
 ├── docs/
 ├── src/
-│   ├── /imports/
-│   │       ├── loadToken.py
-│   ├── Tokens.py
-│   ├── token.txt
+│   ├── imports/
+│   │   └── CarregarTokens.py
+│   ├── AFD.py
+│   ├── TiposToken.py
+│   └── tokens.txt
 ├── tests/
 ├── .gitignore
 ```
@@ -67,21 +106,10 @@ LFA_TPI_2025_1/
    
 3. Rode o programa:
     ```bash
-      python main.py
+    python3 main.py tests/teste.txt
     ```
     
 
----
-## Cronograma de Desenvolvimento (até 20/06)
-| Check   | Sprint       | Período       | Objetivos principais                                                                                                              |
-|---------|--------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| - [ X ] | **Sprint 1** | 07/05 – 16/05 | - Levantamento de requisitos e tipos de token<br>- Desenho do AFD (diagrama)<br>- Setup mínimo do repositório e pastas principais |
-| - [ ]   | **Sprint 2** | 16/05 – 30/05 | - Implementação da leitura de arquivo e ponteiro de caracteres<br>- Codificação das transições do AFD                             |
-| - [ ]   | **Sprint 3** | 30/05 – 16/06 | - Emissão de tokens com tipo, valor e posição<br> - Tratamento de espaços e comentários<br>                                       |
-| - [ ]   | **Sprint 4** | 16/06 – 20/06 | - Documentação final e ajustes no README<br>- Revisão de código e limpeza<br>- Preparação de material de entrega                  |
-
-
----
 ## Ferramentas e Referências Utilizadas
 - Python 3.10 e documentação
 - PyCharm

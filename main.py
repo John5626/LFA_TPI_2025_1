@@ -1,143 +1,144 @@
+# TPI_LFA - 2025.1 - João, Lorenzo e Marcela                main.py
 import sys
 from pathlib import Path
-from src.Tokens import TokenType, get_nome_simbolico, Token
+from src.TiposToken import TipoToken, obterNomeSimbolico
 from src.AFD import AFD
 
-OP_COMP_2 = {
-    "==": TokenType.EQ,
-    ">=": TokenType.GEQ,
-    "<=": TokenType.LEQ,
-    "!=": TokenType.DIF,
-    "&&": TokenType.AND,
-    "||": TokenType.OR,
-}
+def mapearPalavraReservada(lexema: str, tipo: TipoToken) -> TipoToken:
+    """
+    Entrada: lexema, tipo
+    Saída: TipoToken mapeado dadp a palavra
+    """
+    mapPalavrasReservadas = {
+        "int": TipoToken.INTDEF,
+        "if": TipoToken.IF,
+        "float": TipoToken.FLOATDEF,
+        "char": TipoToken.CHAR_TYPE,
+        "bool": TipoToken.BOLL_TYPE,
+        "return": TipoToken.RETURN,
+    }
 
-def classificar_lexema(afd: AFD, lexema: str) -> TokenType:
-    afd.reset()
+    reservado = mapPalavrasReservadas.get(lexema)
+    if reservado is not None:
+        return reservado
 
-    if lexema in OP_COMP_2:
-        return OP_COMP_2[lexema]
+    if tipo == TipoToken.VAR:
+         if not lexema.startswith("VAR") or len(lexema) == 3:
+            raise SyntaxError(f"Variáveis devem começar por 'VAR'")
 
-    afd.reset()
+         return TipoToken.VAR
 
-    if len(lexema) == 1:
-        ch = lexema[0]
-        action = afd.processa(ch)
 
-        if isinstance(action, int):
-            afd.state = action
-            action = afd.processa(" ")
+    return tipo
 
-        if isinstance(action, str) and action.startswith("ACCEPT_"):
-            tok_type = afd.ACCEPT_MAP[action]
-            if tok_type == TokenType.VAR:
-                if lexema == "int":
-                    return TokenType.INTDEF
-                if lexema == "if":
-                    return TokenType.IF
-                if lexema == "float":
-                    return TokenType.FLOATDEF
-                if lexema == "char":
-                    return TokenType.CHAR_TYPE
-                if lexema == "bool":
-                    return TokenType.BOLL_TYPE
-                if lexema == "return":
-                    return TokenType.RETURN
-                return TokenType.VAR
-            return tok_type
 
-        raise SyntaxError(f"Erro léxico: lexema inválido '{lexema}'")
+def classificaUnicoCaractere(afd: AFD, lexema: str) -> TipoToken:
+    """
+    Entrada: AFD, lexema unico
+    Saída: TipoToken correspondente ao lexema
+    """
+    acao = afd.processar(lexema)
+    if isinstance(acao, int):
+        afd.estAtual = acao
+        acao = afd.processar(" ")
+    if isinstance(acao, str) and acao.startswith("ACCEPT_"):
+        return afd.mapAceitacao[acao]
+    raise SyntaxError(f"Lexema inválido '{lexema}'")
 
-    buffer = ""
-    action = None
 
+def classificarMultiplosCaracteres(afd: AFD, lexema: str) -> TipoToken:
+    """
+    Entrada: AFD, lexema mult
+    Saída: TipoToken correspondente ao lexema
+    """
     for ch in lexema:
-        action = afd.processa(ch)
-
-        if isinstance(action, int):
-            afd.state = action
-            buffer += ch
+        acao = afd.processar(ch)
+        if isinstance(acao, int):
+            afd.estAtual = acao
             continue
 
-        if isinstance(action, str) and action.startswith("ACCEPT_"):
-            raise SyntaxError(f"Erro léxico: lexema incompleto ou inválido '{lexema}'")
-        if isinstance(action, str) and action.startswith("ERROR_"):
-            raise SyntaxError(f"Erro léxico: {action} ao processar '{lexema}'")
+        if isinstance(acao, str) and acao.startswith("ACCEPT_"):
+            raise SyntaxError(f"Lexema incompleto ou inválido '{lexema}'")
 
-    action = afd.processa(" ")
-    if isinstance(action, str) and action.startswith("ACCEPT_"):
-        tok_type = afd.ACCEPT_MAP[action]
+        if isinstance(acao, str) and acao.startswith("ERROR_"):
+            raise SyntaxError(f"Erro: {acao} ao processar '{lexema}'")
 
-        # Se for VAR, converter keyword
-        if tok_type == TokenType.VAR:
-            if lexema == "int":
-                return TokenType.INTDEF
-            if lexema == "if":
-                return TokenType.IF
-            if lexema == "float":
-                return TokenType.FLOATDEF
-            if lexema == "char":
-                return TokenType.CHAR_TYPE
-            if lexema == "bool":
-                return TokenType.BOLL_TYPE
-            if lexema == "return":
-                return TokenType.RETURN
-            return TokenType.VAR
-
-        return tok_type
-
+    acao = afd.processar(" ")
+    if isinstance(acao, str) and acao.startswith("ACCEPT_"):
+        return afd.mapAceitacao[acao]
     raise SyntaxError(f"Erro ao classificar lexema '{lexema}'")
 
 
-def main():
+def classificarLexema(afd: AFD, lexema: str) -> TipoToken:
+    opCompDoisCarac = {
+        "==": TipoToken.EQ,
+        ">=": TipoToken.GEQ,
+        "<=": TipoToken.LEQ,
+        "!=": TipoToken.DIF,
+        "&&": TipoToken.AND,
+        "||": TipoToken.OR,
+        "//": TipoToken.COMMENT,
+    }
+
+    afd.reset()
+
+    if lexema.startswith("//"):
+            print(f"[Comentário] {lexema}")
+            return TipoToken.COMMENT
+
+    if lexema in opCompDoisCarac:
+        return opCompDoisCarac[lexema]
+
+    if len(lexema) == 1:
+        tipo = classificaUnicoCaractere(afd, lexema)
+    else:
+        tipo = classificarMultiplosCaracteres(afd, lexema)
+
+    return mapearPalavraReservada(lexema, tipo)
+
+if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Uso: python main_tokens.py <arquivo_fonte.c>")
+        print("Insira o argumento")
         sys.exit(1)
 
-    fonte_path = Path(sys.argv[1])
-    if not fonte_path.exists():
-        print(f"Arquivo '{fonte_path}' não encontrado.")
+    f = Path(sys.argv[1])
+    if not f.exists():
+        print(f"Arquivo '{f}' não encontrado.")
         sys.exit(1)
 
-    # Lê todas as linhas do arquivo de entrada
-    linhas = fonte_path.read_text(encoding="utf-8").splitlines()
-
+    linhas = f.read_text().splitlines()
     afd = AFD()
-    saida_linhas = []
+    linhasSaida = []
 
     for linha in linhas:
         lexemas = linha.strip().split()
-        tokens_na_linha = []
+        tokensNaLinha = []
 
-        for lex in lexemas:
-            if lex == "":
+        for lexema in lexemas:
+            if lexema == "":
                 continue
+
             try:
-                tok_type = classificar_lexema(afd, lex)
+                tipoToken = classificarLexema(afd, lexema)
             except SyntaxError as e:
                 print(f"[Erro léxico] {e}")
                 sys.exit(1)
 
-            if tok_type == TokenType.PVIRGULA:
-                continue
+            #if tipoToken == TipoToken.PVIRGULA:
+            #    continue
 
-            nome = get_nome_simbolico(tok_type)
-            tokens_na_linha.append(nome)
+            nomeSimbolico = obterNomeSimbolico(tipoToken)
+            tokensNaLinha.append(nomeSimbolico)
 
-        saida_linhas.append(" ".join(tokens_na_linha))
+        linhasSaida.append(" ".join(tokensNaLinha))
 
-    saida_path = fonte_path.with_name("saida.txt")
-    with open(saida_path, "w") as fw:
-        for l in saida_linhas:
-            fw.write(l + "\n")
+    f = f.with_name("saida.txt")
+    with open(f, "w") as arquivoSaida:
+        for linha in linhasSaida:
+            arquivoSaida.write(linha + "\n")
 
-    print(f"Processamento concluído. Tokens escritos em '{saida_path}'.")
+    print(f"Processamento concluído. Tokens escritos em '{f}'.")
     print("Tokens encontrados:")
-    for linha in saida_linhas:
+    for linha in linhasSaida:
         print(linha)
 
-
-
-
-if __name__ == "__main__":
-    main()

@@ -1,235 +1,189 @@
-"""
-Autômato Finito Determinístico (AFD) para análise léxica.
-ENTRADAS:
-    * Letras: A-Z, a-z
-    * Dígitos: 0-9
-    * Símbolos: (, ), {, }, [, ], ;, ,, +, -, *, %, /, =, >, <, !, &, |, espaço em branco
-SAÍDAS:
-    * Identificadores (VAR)
-    * Números inteiros (NUM_INT)
-    * Números de ponto flutuante (NUM_FLOAT)
-    * Palavras-chave (IF, INTDEF, FLOATDEF, CHAR_TYPE, BOOL_TYPE, RETURN)
-    * Símbolos de pontuação e operadores (LPAREN, RPAREN, LCHAVE, RCHAVE, LCOLCHETE, RCOLCHETE, PVIRGULA, VIRGULA, SUM, SUB, MULT, DIV, RESTO, EQ, ATRIBUICAO, GEQ, LEQ, GT, LT, NEG, DIF, AND, OR)
+# TPI_LFA - 2025.1 - João, Lorenzo e Marcela                AFD.py
 
-Observações:
-    * Palavras‑reservadas são tratadas fora do AFD.
-    * Estados de um só caractere (LPAREN, RBRACE etc.) aceitam imediatamente.
-"""
-
-from src.Tokens import TokenType
+from src.TiposToken import TipoToken
 
 class AFD:
-    LETRAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-    DIGITOS  = '0123456789'
+    letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    digitos = "0123456789"
 
     def __init__(self):
-        self.STATE_Q0 = 0
-        self.STATE_KW = 1           # ident / keyword (VAR)
-        self.STATE_INT  = 2
-        self.STATE_FLOAT = 3
-        self.STATE_WS = 4
-        self.STATE_DIV_START = 5    # leu '/'
-        self.STATE_COMMENT = 6      # // ... até \n
-        self.STATE_GT_START = 7     # leu '>'
-        self.STATE_LT_START = 8     # leu '<'
-        self.STATE_EQ_START = 9     # leu '='
-        self.STATE_NEG_START = 10   # leu '!'
-        self.STATE_AND_START = 11   # leu '&'
-        self.STATE_OR_START = 12    # leu '|'
+        self.estQ0 = 0
+        self.estPalavraChave = 1
+        self.estNumInteiro = 2
+        self.estNumFlutuante = 3
+        self.estEspaco = 4
+        self.estInicioDivisao = 5       # '/'
+        self.estComentario = 6          # // ... até \n
+        self.estInicioGT = 7            # '>'
+        self.estInicioLT = 8            # '<'
+        self.estInicioEQ = 9            # '='
+        self.estInicioNegacao = 10      # '!'
+        self.estInicioAnd = 11          # '&'
+        self.estInicioOr = 12           # '|'
 
-        self.ACCEPT_MAP = {
-            'ACCEPT_LPAREN' : TokenType.LPAREN,
-            'ACCEPT_RPAREN' : TokenType.RPAREN,
-            'ACCEPT_LBRACE' : TokenType.LCHAVE,
-            'ACCEPT_RBRACE' : TokenType.RCHAVE,
-            'ACCEPT_LBRACKET' : TokenType.LCOLCHETE,
-            'ACCEPT_RBRACKET' : TokenType.RCOLCHETE,
-            'ACCEPT_SEMICOLON': TokenType.PVIRGULA,
-            'ACCEPT_COMMA' : TokenType.VIRGULA,
-
-            'ACCEPT_EQ' : TokenType.EQ,
-            'ACCEPT_ASSIGN' : TokenType.ATRIBUICAO,
-            'ACCEPT_GEQ' : TokenType.GEQ,
-            'ACCEPT_LEQ' : TokenType.LEQ,
-            'ACCEPT_GT'  : TokenType.GT,
-            'ACCEPT_LT'  : TokenType.LT,
-            'ACCEPT_NEG' : TokenType.NEG,
-            'ACCEPT_DIF' : TokenType.DIF,
-            'ACCEPT_AND' : TokenType.AND,
-            'ACCEPT_OR'  : TokenType.OR,
-
-            'ACCEPT_SUM' : TokenType.SUM,
-            'ACCEPT_SUB' : TokenType.SUB,
-            'ACCEPT_MULT' : TokenType.MULT,
-            'ACCEPT_DIV' : TokenType.DIV,
-            'ACCEPT_RESTO' : TokenType.RESTO,
-
-            'ACCEPT_NUM_INT' : TokenType.NUM_INT,
-            'ACCEPT_NUM_FLOAT' : TokenType.NUM_FLOAT,
-            'ACCEPT_VAR' : TokenType.VAR,
-
-            'ACCEPT_IF' : TokenType.IF,
-            'ACCEPT_INTDEF' : TokenType.INTDEF,
-            'ACCEPT_FLOATDEF' : TokenType.FLOATDEF,
-            'ACCEPT_CHAR_TYPE' : TokenType.CHAR_TYPE,
-            'ACCEPT_BOOL_TYPE' : TokenType.BOLL_TYPE,
-            'ACCEPT_RETURN' : TokenType.RETURN,
-
-            'ACCEPT_WS' : TokenType.WHITESPACE,
-            'ACCEPT_COMMENT' : TokenType.COMMENT
+        self.mapAceitacao = {
+            "ACCEPT_LPAREN": TipoToken.LParenteses,
+            "ACCEPT_RPAREN": TipoToken.RParenteses,
+            "ACCEPT_LBRACE": TipoToken.LChave,
+            "ACCEPT_RBRACE": TipoToken.RChave,
+            "ACCEPT_LBRACKET": TipoToken.LColchete,
+            "ACCEPT_RBRACKET": TipoToken.RColchete,
+            "ACCEPT_SEMICOLON": TipoToken.PVirgula,
+            "ACCEPT_COMMA": TipoToken.Virgula,
+            "ACCEPT_EQ": TipoToken.EQ,
+            "ACCEPT_ASSIGN": TipoToken.Atribuicao,
+            "ACCEPT_GEQ": TipoToken.GEQ,
+            "ACCEPT_LEQ": TipoToken.LEQ,
+            "ACCEPT_GT": TipoToken.GT,
+            "ACCEPT_LT": TipoToken.LT,
+            "ACCEPT_NEG": TipoToken.NEG,
+            "ACCEPT_DIF": TipoToken.DIF,
+            "ACCEPT_AND": TipoToken.AND,
+            "ACCEPT_OR": TipoToken.OR,
+            "ACCEPT_SUM": TipoToken.SUM,
+            "ACCEPT_SUB": TipoToken.SUB,
+            "ACCEPT_MULT": TipoToken.MULT,
+            "ACCEPT_DIV": TipoToken.DIV,
+            "ACCEPT_RESTO": TipoToken.RESTO,
+            "ACCEPT_NUM_INT": TipoToken.NUM_INT,
+            "ACCEPT_NUM_FLOAT": TipoToken.NUM_FLOAT,
+            "ACCEPT_VAR": TipoToken.VAR,
+            "ACCEPT_IF": TipoToken.IF,
+            "ACCEPT_INTDEF": TipoToken.INTDEF,
+            "ACCEPT_FLOATDEF": TipoToken.FLOATDEF,
+            "ACCEPT_CHAR_TYPE": TipoToken.CHAR_TYPE,
+            "ACCEPT_BOOL_TYPE": TipoToken.BOLL_TYPE,
+            "ACCEPT_RETURN": TipoToken.RETURN,
+            "ACCEPT_WS": TipoToken.WHITESPACE,
+            "ACCEPT_COMMENT": TipoToken.COMMENT,
         }
 
-        self.state = self.STATE_Q0 # estado inicial
+        self.estAtual = self.estQ0
 
-
-    def processa(self, ch):
-        """Processa um caractere e devolve próximo passo."""
-
-        if self.state == self.STATE_Q0:
-            if ch is None:           # EOF
+    def processar(self, c):
+        if self.estAtual == self.estQ0:
+            if c is None:
                 return None
+            if c.isspace():
+                return self.estEspaco
+            if self.ehLetra(c):
+                return self.estPalavraChave
+            if self.ehDigito(c):
+                return self.estNumInteiro
+            if c == ";":
+                return "ACCEPT_SEMICOLON"
 
-            if ch.isspace():         # espaço / tab / \n
-                return self.STATE_WS
-
-            if self.is_letter(ch):  # identificador / keyword
-                return self.STATE_KW
-
-            if self.is_digit(ch):   # número inteiro
-                return self.STATE_INT
-
-            if ch == ';':
-                return 'ACCEPT_SEMICOLON'
-
-            one_char_tokens = {
-                '(': 'ACCEPT_LPAREN',
-                ')': 'ACCEPT_RPAREN',
-                '{': 'ACCEPT_LBRACE',
-                '}': 'ACCEPT_RBRACE',
-                '[': 'ACCEPT_LBRACKET',
-                ']': 'ACCEPT_RBRACKET',
-                ',': 'ACCEPT_COMMA',
-                '+': 'ACCEPT_SUM',
-                '-': 'ACCEPT_SUB',
-                '*': 'ACCEPT_MULT',
-                '%': 'ACCEPT_RESTO',
+            tokensUnico = {
+                "(": "ACCEPT_LPAREN",
+                ")": "ACCEPT_RPAREN",
+                "{": "ACCEPT_LBRACE",
+                "}": "ACCEPT_RBRACE",
+                "[": "ACCEPT_LBRACKET",
+                "]": "ACCEPT_RBRACKET",
+                ",": "ACCEPT_COMMA",
+                "+": "ACCEPT_SUM",
+                "-": "ACCEPT_SUB",
+                "*": "ACCEPT_MULT",
+                "%": "ACCEPT_RESTO",
             }
+            
+            if c in tokensUnico:
+                return tokensUnico[c]
+            if c == "/":
+                return self.estInicioDivisao
+            if c == "=":
+                return self.estInicioEQ
+            if c == ">":
+                return self.estInicioGT
+            if c == "<":
+                return self.estInicioLT
+            if c == "!":
+                return self.estInicioNegacao
+            if c == "&":
+                return self.estInicioAnd
+            if c == "|":
+                return self.estInicioOr
+            return "ERROR_UNKNOWN_CHAR"
 
-            if ch in one_char_tokens:
-                return one_char_tokens[ch]
+        if self.estAtual == self.estPalavraChave:
+            if c is not None and (self.ehLetra(c) or self.ehDigito(c)):
+                return self.estPalavraChave
+            return "ACCEPT_VAR"
 
-            if ch == '/':
-                return self.STATE_DIV_START
+        if self.estAtual == self.estNumInteiro:
+            if c is not None and self.ehDigito(c):
+                return self.estNumInteiro
+            if c == ".":
+                return self.estNumFlutuante
+            return "ACCEPT_NUM_INT"
 
-            if ch == '=':
-                return self.STATE_EQ_START
+        if self.estAtual == self.estNumFlutuante:
+            if c is not None and self.ehDigito(c):
+                return self.estNumFlutuante
+            return "ACCEPT_NUM_FLOAT"
 
-            if ch == '>':
-                return self.STATE_GT_START
+        if self.estAtual == self.estEspaco:
+            if c is not None and c.isspace():
+                return self.estEspaco
+            return "ACCEPT_WS"
 
-            if ch == '<':
-                return self.STATE_LT_START
+        if self.estAtual == self.estInicioDivisao:
+            if c == "/":
+                return self.estComentario
+            return "ACCEPT_DIV"
 
-            if ch == '!':
-                return self.STATE_NEG_START
+        if self.estAtual == self.estComentario:
+            if c is None or c == "\n":
+                return "ACCEPT_WS"
+            return self.estComentario
 
-            if ch == '&':
-                return self.STATE_AND_START
+        if self.estAtual == self.estInicioEQ:
+            if c == "=":
+                return "ACCEPT_EQ"
+            return "ACCEPT_ASSIGN"
 
-            if ch == '|':
-                return self.STATE_OR_START
+        if self.estAtual == self.estInicioGT:
+            if c == "=":
+                return "ACCEPT_GEQ"
+            return "ACCEPT_GT"
 
-            return 'ERROR_UNKNOWN_CHAR'
+        if self.estAtual == self.estInicioLT:
+            if c == "=":
+                return "ACCEPT_LEQ"
+            return "ACCEPT_LT"
 
-        elif self.state == self.STATE_KW:
-            if ch is not None and (self.is_letter(ch) or self.is_digit(ch)):
-                return self.STATE_KW
-            return 'ACCEPT_VAR'
+        if self.estAtual == self.estInicioNegacao:
+            if c == "=":
+                return "ACCEPT_DIF"
+            return "ACCEPT_NEG"
 
-        elif self.state == self.STATE_INT:
-            if ch is not None and self.is_digit(ch):
-                return self.STATE_INT
-            if ch == '.':
-                return self.STATE_FLOAT
-            return 'ACCEPT_NUM_INT'
+        if self.estAtual == self.estInicioAnd:
+            if c == "&":
+                return "ACCEPT_AND"
+            return "ERROR_EXPECTED_AND"
 
-        elif self.state == self.STATE_FLOAT:
-            if ch is not None and self.is_digit(ch):
-                return self.STATE_FLOAT
-            return 'ACCEPT_NUM_FLOAT'
+        if self.estAtual == self.estInicioOr:
+            if c == "|":
+                return "ACCEPT_OR"
+            return "ERROR_EXPECTED_OR"
 
-        elif self.state == self.STATE_WS:
-            if ch is not None and ch.isspace():
-                return self.STATE_WS
-            return 'ACCEPT_WS'
-
-        elif self.state == self.STATE_DIV_START:
-            if ch == '/':
-                return self.STATE_COMMENT
-
-            if ch == '*':
-                return 'ACCEPT_DIV'   # não consome '*', lexer irá reler
-
-            return 'ACCEPT_DIV'
-
-        elif self.state == self.STATE_COMMENT:
-            if ch is None or ch == '\n':
-                return 'ACCEPT_WS'    # descarta como ws
-            return STATE_COMMENT
-
-        elif self.state == self.STATE_EQ_START:
-            if ch == '=':
-                return 'ACCEPT_EQ'
-            return 'ACCEPT_ASSIGN'
-
-        elif self.state == self.STATE_GT_START:
-            if ch == '=':
-                return 'ACCEPT_GEQ'
-            return 'ACCEPT_GT'
-
-        elif self.state == self.STATE_LT_START:
-            if ch == '=':
-                return 'ACCEPT_LEQ'
-            return 'ACCEPT_LT'
-
-        elif self.state == self.STATE_NEG_START:
-            if ch == '=':
-                return 'ACCEPT_DIF'
-            return 'ACCEPT_NEG'
-
-        elif self.state == self.STATE_AND_START:
-            if ch == '&':
-                return 'ACCEPT_AND'
-            return 'ERROR_EXPECTED_AND'
-
-        elif self.state == self.STATE_OR_START:
-            if ch == '|':
-                return 'ACCEPT_OR'
-            return 'ERROR_EXPECTED_OR'
-
-        else:
-            return 'ERROR_STATE_{self.state}'
+        return f"ERROR_STATE_{self.estAtual}"
 
     @staticmethod
-    def is_letter(c: str) -> bool:
-        return c in AFD.LETRAS
+    def ehLetra(c: str) -> bool:
+        return c in AFD.letras
 
     @staticmethod
-    def is_digit(c: str) -> bool:
-        return c in AFD.DIGITOS
+    def ehDigito(c: str) -> bool:
+        return c in AFD.digitos
 
     def reset(self):
-        self.state = self.STATE_Q0
+        self.estAtual = self.estQ0
 
     @staticmethod
-    def is_accept(action):
-        return isinstance(action, str) and action.startswith('ACCEPT_')
+    def aceita(acao):
+        return isinstance(acao, str) and acao.startswith("ACCEPT_")
 
     @staticmethod
-    def is_error(action):
-        return isinstance(action, str) and action.startswith('ERROR_')
-
-
-
-
-
+    def ehErro(acao):
+        return isinstance(acao, str) and acao.startswith("ERROR_")
